@@ -1,366 +1,475 @@
 
 import { useState } from "react";
-import { Bell, Moon, Sun, User, Shield, Brain, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { User, Bell, Palette, Bot, Shield, Download, Trash2 } from "lucide-react";
 
 export const Settings = () => {
-  const [settings, setSettings] = useState({
-    profile: {
-      name: "John Doe",
-      email: "john.doe@student.edu",
-      bio: "Computer Science student focused on AI and machine learning."
-    },
-    notifications: {
-      emailNotifications: true,
-      pushNotifications: true,
-      dailyReminders: true,
-      weeklyReport: false,
-      reminderTime: "09:00"
-    },
-    preferences: {
-      theme: "light",
-      defaultPriority: "Medium",
-      defaultCategory: "Assignment",
-      autoSave: true,
-      showCompletedTasks: false
-    },
-    ai: {
-      enableSuggestions: true,
-      suggestionFrequency: "daily",
-      motivationalMessages: true,
-      smartScheduling: true
-    }
+  const { toast } = useToast();
+  
+  // Profile settings state
+  const [profile, setProfile] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
   });
 
-  const updateSettings = (section: string, key: string, value: any) => {
-    setSettings(prev => ({
+  // Notification settings state
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    taskReminders: true,
+    weeklyDigest: true,
+    reminderTiming: "1h"
+  });
+
+  // App preferences state
+  const [preferences, setPreferences] = useState({
+    theme: "light",
+    defaultPriority: "medium",
+    defaultCategory: "assignment",
+    autoSave: true
+  });
+
+  // AI assistant settings state
+  const [aiSettings, setAiSettings] = useState({
+    enabled: true,
+    suggestions: true,
+    autoComplete: false,
+    smartDeadlines: true
+  });
+
+  const handleProfileSave = () => {
+    if (profile.newPassword && profile.newPassword !== profile.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords don't match",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate API call
+    toast({
+      title: "Profile Updated",
+      description: "Your profile settings have been saved successfully."
+    });
+    
+    // Clear password fields
+    setProfile(prev => ({
       ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [key]: value
-      }
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
     }));
   };
 
+  const handleNotificationSave = () => {
+    toast({
+      title: "Notifications Updated",
+      description: "Your notification preferences have been saved."
+    });
+  };
+
+  const handlePreferencesSave = () => {
+    toast({
+      title: "Preferences Updated",
+      description: "Your app preferences have been saved."
+    });
+  };
+
+  const handleAiSettingsSave = () => {
+    toast({
+      title: "AI Settings Updated",
+      description: "Your AI assistant settings have been saved."
+    });
+  };
+
+  const handleExportData = () => {
+    // Simulate data export
+    const data = {
+      profile,
+      notifications,
+      preferences,
+      aiSettings,
+      exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'studyflow-data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Data Exported",
+      description: "Your data has been downloaded as a JSON file."
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    // This would typically show a confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+    
+    if (confirmed) {
+      toast({
+        title: "Account Deletion Requested",
+        description: "Your account deletion request has been submitted. You will receive a confirmation email.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center space-x-3 mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Settings
-        </h1>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-gray-600 mt-2">Manage your account and application preferences</p>
       </div>
 
       {/* Profile Settings */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <User className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-semibold">Profile Settings</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input 
-              id="name"
-              value={settings.profile.name}
-              onChange={(e) => updateSettings('profile', 'name', e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input 
-              id="email"
-              type="email"
-              value={settings.profile.email}
-              onChange={(e) => updateSettings('profile', 'email', e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea 
-              id="bio"
-              value={settings.profile.bio}
-              onChange={(e) => updateSettings('profile', 'bio', e.target.value)}
-              placeholder="Tell us about yourself..."
-              rows={3}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Notification Settings */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <Bell className="h-6 w-6 text-green-600" />
-          <h2 className="text-xl font-semibold">Notification Preferences</h2>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="email-notifications">Email Notifications</Label>
-              <p className="text-sm text-gray-600">Receive task reminders and updates via email</p>
-            </div>
-            <Switch 
-              id="email-notifications"
-              checked={settings.notifications.emailNotifications}
-              onCheckedChange={(checked) => updateSettings('notifications', 'emailNotifications', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="push-notifications">Push Notifications</Label>
-              <p className="text-sm text-gray-600">Get browser notifications for important updates</p>
-            </div>
-            <Switch 
-              id="push-notifications"
-              checked={settings.notifications.pushNotifications}
-              onCheckedChange={(checked) => updateSettings('notifications', 'pushNotifications', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="daily-reminders">Daily Reminders</Label>
-              <p className="text-sm text-gray-600">Get daily task summaries</p>
-            </div>
-            <Switch 
-              id="daily-reminders"
-              checked={settings.notifications.dailyReminders}
-              onCheckedChange={(checked) => updateSettings('notifications', 'dailyReminders', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="weekly-report">Weekly Progress Report</Label>
-              <p className="text-sm text-gray-600">Receive weekly productivity insights</p>
-            </div>
-            <Switch 
-              id="weekly-report"
-              checked={settings.notifications.weeklyReport}
-              onCheckedChange={(checked) => updateSettings('notifications', 'weeklyReport', checked)}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Profile Settings
+          </CardTitle>
+          <CardDescription>Update your personal information and password</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="reminder-time">Daily Reminder Time</Label>
-              <Input 
-                id="reminder-time"
-                type="time"
-                value={settings.notifications.reminderTime}
-                onChange={(e) => updateSettings('notifications', 'reminderTime', e.target.value)}
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={profile.name}
+                onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
               />
             </div>
           </div>
-        </div>
-      </div>
+          
+          <Separator />
+          
+          <div className="space-y-4">
+            <h4 className="font-medium">Change Password</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  value={profile.currentPassword}
+                  onChange={(e) => setProfile(prev => ({ ...prev, currentPassword: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={profile.newPassword}
+                  onChange={(e) => setProfile(prev => ({ ...prev, newPassword: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={profile.confirmPassword}
+                  onChange={(e) => setProfile(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <Button onClick={handleProfileSave} className="w-full md:w-auto">
+            Save Profile Changes
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Notification Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Notification Settings
+          </CardTitle>
+          <CardDescription>Configure how you receive notifications</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="email-notifications">Email Notifications</Label>
+                <p className="text-sm text-gray-600">Receive updates via email</p>
+              </div>
+              <Switch
+                id="email-notifications"
+                checked={notifications.emailNotifications}
+                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, emailNotifications: checked }))}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="push-notifications">Push Notifications</Label>
+                <p className="text-sm text-gray-600">Receive browser notifications</p>
+              </div>
+              <Switch
+                id="push-notifications"
+                checked={notifications.pushNotifications}
+                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, pushNotifications: checked }))}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="task-reminders">Task Reminders</Label>
+                <p className="text-sm text-gray-600">Get reminded about upcoming deadlines</p>
+              </div>
+              <Switch
+                id="task-reminders"
+                checked={notifications.taskReminders}
+                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, taskReminders: checked }))}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="weekly-digest">Weekly Digest</Label>
+                <p className="text-sm text-gray-600">Weekly summary of your tasks</p>
+              </div>
+              <Switch
+                id="weekly-digest"
+                checked={notifications.weeklyDigest}
+                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, weeklyDigest: checked }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Reminder Timing</Label>
+              <Select value={notifications.reminderTiming} onValueChange={(value) => setNotifications(prev => ({ ...prev, reminderTiming: value }))}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15m">15 minutes before</SelectItem>
+                  <SelectItem value="30m">30 minutes before</SelectItem>
+                  <SelectItem value="1h">1 hour before</SelectItem>
+                  <SelectItem value="2h">2 hours before</SelectItem>
+                  <SelectItem value="1d">1 day before</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <Button onClick={handleNotificationSave} className="w-full md:w-auto">
+            Save Notification Settings
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* App Preferences */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <Palette className="h-6 w-6 text-purple-600" />
-          <h2 className="text-xl font-semibold">App Preferences</h2>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            App Preferences
+          </CardTitle>
+          <CardDescription>Customize your app experience</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="theme">Theme</Label>
-              <Select 
-                value={settings.preferences.theme}
-                onValueChange={(value) => updateSettings('preferences', 'theme', value)}
-              >
+              <Label>Theme</Label>
+              <Select value={preferences.theme} onValueChange={(value) => setPreferences(prev => ({ ...prev, theme: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="light">
-                    <div className="flex items-center space-x-2">
-                      <Sun className="h-4 w-4" />
-                      <span>Light</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="dark">
-                    <div className="flex items-center space-x-2">
-                      <Moon className="h-4 w-4" />
-                      <span>Dark</span>
-                    </div>
-                  </SelectItem>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="default-priority">Default Task Priority</Label>
-              <Select 
-                value={settings.preferences.defaultPriority}
-                onValueChange={(value) => updateSettings('preferences', 'defaultPriority', value)}
-              >
+              <Label>Default Priority</Label>
+              <Select value={preferences.defaultPriority} onValueChange={(value) => setPreferences(prev => ({ ...prev, defaultPriority: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="High">High</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="default-category">Default Task Category</Label>
-              <Select 
-                value={settings.preferences.defaultCategory}
-                onValueChange={(value) => updateSettings('preferences', 'defaultCategory', value)}
-              >
+              <Label>Default Category</Label>
+              <Select value={preferences.defaultCategory} onValueChange={(value) => setPreferences(prev => ({ ...prev, defaultCategory: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Assignment">Assignment</SelectItem>
-                  <SelectItem value="Exam">Exam</SelectItem>
-                  <SelectItem value="Study">Study</SelectItem>
-                  <SelectItem value="Personal">Personal</SelectItem>
+                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="exam">Exam</SelectItem>
+                  <SelectItem value="study">Study</SelectItem>
+                  <SelectItem value="project">Project</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="auto-save">Auto Save</Label>
+                <p className="text-sm text-gray-600">Automatically save changes</p>
+              </div>
+              <Switch
+                id="auto-save"
+                checked={preferences.autoSave}
+                onCheckedChange={(checked) => setPreferences(prev => ({ ...prev, autoSave: checked }))}
+              />
+            </div>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="auto-save">Auto-save Changes</Label>
-              <p className="text-sm text-gray-600">Automatically save task edits</p>
-            </div>
-            <Switch 
-              id="auto-save"
-              checked={settings.preferences.autoSave}
-              onCheckedChange={(checked) => updateSettings('preferences', 'autoSave', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="show-completed">Show Completed Tasks</Label>
-              <p className="text-sm text-gray-600">Display completed tasks in lists</p>
-            </div>
-            <Switch 
-              id="show-completed"
-              checked={settings.preferences.showCompletedTasks}
-              onCheckedChange={(checked) => updateSettings('preferences', 'showCompletedTasks', checked)}
-            />
-          </div>
-        </div>
-      </div>
+          <Button onClick={handlePreferencesSave} className="w-full md:w-auto">
+            Save Preferences
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* AI Assistant Settings */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <Brain className="h-6 w-6 text-indigo-600" />
-          <h2 className="text-xl font-semibold">AI Assistant Settings</h2>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="ai-suggestions">Enable AI Suggestions</Label>
-              <p className="text-sm text-gray-600">Get smart recommendations for task management</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5" />
+            AI Assistant Settings
+          </CardTitle>
+          <CardDescription>Configure your AI assistant preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="ai-enabled">Enable AI Assistant</Label>
+                <p className="text-sm text-gray-600">Turn on/off AI features</p>
+              </div>
+              <Switch
+                id="ai-enabled"
+                checked={aiSettings.enabled}
+                onCheckedChange={(checked) => setAiSettings(prev => ({ ...prev, enabled: checked }))}
+              />
             </div>
-            <Switch 
-              id="ai-suggestions"
-              checked={settings.ai.enableSuggestions}
-              onCheckedChange={(checked) => updateSettings('ai', 'enableSuggestions', checked)}
-            />
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="ai-suggestions">Smart Suggestions</Label>
+                <p className="text-sm text-gray-600">Get AI-powered task suggestions</p>
+              </div>
+              <Switch
+                id="ai-suggestions"
+                checked={aiSettings.suggestions}
+                onCheckedChange={(checked) => setAiSettings(prev => ({ ...prev, suggestions: checked }))}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="ai-autocomplete">Auto-complete Tasks</Label>
+                <p className="text-sm text-gray-600">AI helps complete task descriptions</p>
+              </div>
+              <Switch
+                id="ai-autocomplete"
+                checked={aiSettings.autoComplete}
+                onCheckedChange={(checked) => setAiSettings(prev => ({ ...prev, autoComplete: checked }))}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="smart-deadlines">Smart Deadlines</Label>
+                <p className="text-sm text-gray-600">AI suggests optimal deadlines</p>
+              </div>
+              <Switch
+                id="smart-deadlines"
+                checked={aiSettings.smartDeadlines}
+                onCheckedChange={(checked) => setAiSettings(prev => ({ ...prev, smartDeadlines: checked }))}
+              />
+            </div>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="motivational-messages">Motivational Messages</Label>
-              <p className="text-sm text-gray-600">Receive encouraging tips and quotes</p>
-            </div>
-            <Switch 
-              id="motivational-messages"
-              checked={settings.ai.motivationalMessages}
-              onCheckedChange={(checked) => updateSettings('ai', 'motivationalMessages', checked)}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="smart-scheduling">Smart Scheduling</Label>
-              <p className="text-sm text-gray-600">AI-powered task scheduling optimization</p>
-            </div>
-            <Switch 
-              id="smart-scheduling"
-              checked={settings.ai.smartScheduling}
-              onCheckedChange={(checked) => updateSettings('ai', 'smartScheduling', checked)}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="suggestion-frequency">Suggestion Frequency</Label>
-            <Select 
-              value={settings.ai.suggestionFrequency}
-              onValueChange={(value) => updateSettings('ai', 'suggestionFrequency', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="realtime">Real-time</SelectItem>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="manual">Manual only</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+          <Button onClick={handleAiSettingsSave} className="w-full md:w-auto">
+            Save AI Settings
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Privacy & Security */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <Shield className="h-6 w-6 text-red-600" />
-          <h2 className="text-xl font-semibold">Privacy & Security</h2>
-        </div>
-        
-        <div className="space-y-4">
-          <Button variant="outline" className="w-full justify-start">
-            Change Password
-          </Button>
-          
-          <Button variant="outline" className="w-full justify-start">
-            Export My Data
-          </Button>
-          
-          <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700">
-            Delete Account
-          </Button>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="flex justify-end space-x-4">
-        <Button variant="outline">Reset to Defaults</Button>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-          Save Changes
-        </Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Privacy & Security
+          </CardTitle>
+          <CardDescription>Manage your data and account security</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Data Export</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Download all your data in JSON format
+              </p>
+              <Button onClick={handleExportData} variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export My Data
+              </Button>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2 text-red-600">Danger Zone</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Permanently delete your account and all associated data
+              </p>
+              <Button onClick={handleDeleteAccount} variant="destructive" className="flex items-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
