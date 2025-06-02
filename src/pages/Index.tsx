@@ -1,16 +1,16 @@
-
 import { useState } from "react";
 import { TaskDashboard } from "@/components/TaskDashboard";
 import { TaskForm } from "@/components/TaskForm";
 import { TaskList } from "@/components/TaskList";
 import { TaskCalendar } from "@/components/TaskCalendar";
 import { TaskAnalytics } from "@/components/TaskAnalytics";
+import { Settings } from "@/components/Settings";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { Task } from "@/types/Task";
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'calendar' | 'analytics'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'calendar' | 'analytics' | 'settings'>('dashboard');
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
@@ -106,6 +106,8 @@ const Index = () => {
         return <TaskCalendar tasks={tasks} onAddTask={addTask} />;
       case 'analytics':
         return <TaskAnalytics tasks={tasks} />;
+      case 'settings':
+        return <Settings />;
       default:
         return <TaskDashboard tasks={tasks} onAddTask={() => setCurrentView('tasks')} />;
     }

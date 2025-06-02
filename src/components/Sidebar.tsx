@@ -3,8 +3,8 @@ import { BarChart3, Calendar, Home, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
-  currentView: 'dashboard' | 'tasks' | 'calendar' | 'analytics';
-  onViewChange: (view: 'dashboard' | 'tasks' | 'calendar' | 'analytics') => void;
+  currentView: 'dashboard' | 'tasks' | 'calendar' | 'analytics' | 'settings';
+  onViewChange: (view: 'dashboard' | 'tasks' | 'calendar' | 'analytics' | 'settings') => void;
 }
 
 export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
@@ -41,7 +41,15 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
       </div>
       
       <div className="absolute bottom-6 left-6 right-6">
-        <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+        <button 
+          onClick={() => onViewChange('settings')}
+          className={cn(
+            "w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+            currentView === 'settings'
+              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+              : "text-gray-600 hover:bg-gray-100"
+          )}
+        >
           <Settings className="h-5 w-5" />
           <span className="font-medium">Settings</span>
         </button>
