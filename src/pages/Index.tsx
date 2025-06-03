@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { TaskDashboard } from "@/components/TaskDashboard";
 import { TaskForm } from "@/components/TaskForm";
@@ -114,8 +115,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="flex">
+    <div 
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: `url('/lovable-uploads/69b7411a-07f4-4583-9f98-f770319ecf48.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+      <div className="relative z-10 flex">
         <Sidebar currentView={currentView} onViewChange={setCurrentView} />
         <div className="flex-1 flex flex-col">
           <Header />
