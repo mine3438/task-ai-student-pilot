@@ -10,7 +10,7 @@ export const useTasks = () => {
   // Fetch all tasks from Supabase
   const fetchTasks = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('tasks')
         .select('*')
         .order('created_at', { ascending: false });
@@ -44,7 +44,7 @@ export const useTasks = () => {
   // Add a new task
   const addTask = async (task: Omit<Task, 'id' | 'createdAt'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('tasks')
         .insert([{
           title: task.title,
@@ -93,7 +93,7 @@ export const useTasks = () => {
       if (updates.category !== undefined) updateData.category = updates.category;
       if (updates.completed !== undefined) updateData.completed = updates.completed;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('tasks')
         .update(updateData)
         .eq('id', id);
@@ -114,7 +114,7 @@ export const useTasks = () => {
   // Delete a task
   const deleteTask = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('tasks')
         .delete()
         .eq('id', id);
