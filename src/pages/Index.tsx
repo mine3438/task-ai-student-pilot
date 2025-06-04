@@ -8,65 +8,15 @@ import { TaskAnalytics } from "@/components/TaskAnalytics";
 import { Settings } from "@/components/Settings";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
-import { Task } from "@/types/Task";
+import { useTasks } from "@/hooks/useTasks";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'calendar' | 'analytics' | 'settings'>('dashboard');
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      title: 'Complete React Assignment',
-      description: 'Build a todo app with TypeScript',
-      deadline: new Date('2024-06-10'),
-      priority: 'High',
-      category: 'Assignment',
-      completed: false,
-      createdAt: new Date('2024-06-01')
-    },
-    {
-      id: '2',
-      title: 'Study for Math Exam',
-      description: 'Review chapters 5-8, practice problems',
-      deadline: new Date('2024-06-15'),
-      priority: 'High',
-      category: 'Exam',
-      completed: false,
-      createdAt: new Date('2024-06-02')
-    },
-    {
-      id: '3',
-      title: 'Read History Chapter',
-      description: 'Chapter 12: World War II',
-      deadline: new Date('2024-06-08'),
-      priority: 'Medium',
-      category: 'Study',
-      completed: true,
-      createdAt: new Date('2024-05-28')
-    }
-  ]);
+  const { tasks, loading, addTask, updateTask, deleteTask } = useTasks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [filterPriority, setFilterPriority] = useState<string>('All');
   const [filterStatus, setFilterStatus] = useState<string>('All');
-
-  const addTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
-    const newTask: Task = {
-      ...task,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
-    setTasks(prev => [...prev, newTask]);
-  };
-
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === id ? { ...task, ...updates } : task
-    ));
-  };
-
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
-  };
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,6 +31,14 @@ const Index = () => {
   });
 
   const renderCurrentView = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading tasks...</div>
+        </div>
+      );
+    }
+
     switch (currentView) {
       case 'dashboard':
         return <TaskDashboard tasks={tasks} onAddTask={() => setCurrentView('tasks')} />;
