@@ -20,18 +20,20 @@ export const useTasks = () => {
         return;
       }
 
-      const formattedTasks: Task[] = data.map(task => ({
-        id: task.id,
-        title: task.title,
-        description: task.description || '',
-        deadline: new Date(task.deadline),
-        priority: task.priority as 'High' | 'Medium' | 'Low',
-        category: task.category as 'Assignment' | 'Exam' | 'Study' | 'Personal',
-        completed: task.completed,
-        createdAt: new Date(task.created_at)
-      }));
+      if (data) {
+        const formattedTasks: Task[] = data.map((task: any) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description || '',
+          deadline: new Date(task.deadline),
+          priority: task.priority as 'High' | 'Medium' | 'Low',
+          category: task.category as 'Assignment' | 'Exam' | 'Study' | 'Personal',
+          completed: task.completed,
+          createdAt: new Date(task.created_at)
+        }));
 
-      setTasks(formattedTasks);
+        setTasks(formattedTasks);
+      }
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -60,18 +62,20 @@ export const useTasks = () => {
         return;
       }
 
-      const newTask: Task = {
-        id: data.id,
-        title: data.title,
-        description: data.description || '',
-        deadline: new Date(data.deadline),
-        priority: data.priority as 'High' | 'Medium' | 'Low',
-        category: data.category as 'Assignment' | 'Exam' | 'Study' | 'Personal',
-        completed: data.completed,
-        createdAt: new Date(data.created_at)
-      };
+      if (data) {
+        const newTask: Task = {
+          id: data.id,
+          title: data.title,
+          description: data.description || '',
+          deadline: new Date(data.deadline),
+          priority: data.priority as 'High' | 'Medium' | 'Low',
+          category: data.category as 'Assignment' | 'Exam' | 'Study' | 'Personal',
+          completed: data.completed,
+          createdAt: new Date(data.created_at)
+        };
 
-      setTasks(prev => [newTask, ...prev]);
+        setTasks(prev => [newTask, ...prev]);
+      }
     } catch (error) {
       console.error('Error adding task:', error);
     }
