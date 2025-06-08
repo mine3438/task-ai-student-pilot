@@ -4,6 +4,8 @@ import { X, Send, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 interface Message {
   id: string;
@@ -21,7 +23,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm your AI study assistant. I can help you manage your tasks, suggest study schedules, and provide productivity tips. How can I help you today?",
+      text: "Hi! I'm your AI study assistant powered by advanced AI. I can help you manage your tasks, create personalized study schedules, provide productivity tips, and support your academic goals. How can I help you today?",
       isBot: true,
       timestamp: new Date()
     }
@@ -40,35 +42,54 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI response (in a real app, this would call an AI API)
-    setTimeout(() => {
+    try {
+      // Prepare conversation history for context
+      const conversationHistory = messages.map(msg => ({
+        role: msg.isBot ? 'assistant' : 'user',
+        content: msg.text
+      }));
+
+      const { data, error } = await supabase.functions.invoke('chat-with-ai', {
+        body: {
+          message: currentInput,
+          conversationHistory: conversationHistory
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputValue),
+        text: data.response,
         isBot: true,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 1500);
-  };
 
-  const getBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('schedule') || input.includes('plan')) {
-      return "I can help you create an optimal study schedule! Based on your current tasks, I recommend starting with high-priority items and breaking large tasks into smaller chunks. Would you like me to analyze your current tasks and suggest a schedule?";
-    } else if (input.includes('productivity') || input.includes('focus')) {
-      return "Here are some productivity tips: 1) Use the Pomodoro technique (25 min focused work + 5 min break), 2) Tackle your hardest tasks when you're most alert, 3) Remove distractions from your workspace. What specific area would you like help with?";
-    } else if (input.includes('deadline') || input.includes('overdue')) {
-      return "I see you're concerned about deadlines! Let me help you prioritize. Focus on overdue tasks first, then work on items due within the next 3 days. Would you like me to create a priority list for you?";
-    } else if (input.includes('motivation') || input.includes('stressed')) {
-      return "Remember, every expert was once a beginner! Break down overwhelming tasks into smaller, manageable steps. Celebrate small wins along the way. You've got this! 💪 What specific task is causing you stress?";
-    } else {
-      return "That's an interesting question! I'm here to help with task management, study planning, productivity tips, and motivation. Feel free to ask me about organizing your schedule, managing deadlines, or improving your study habits.";
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive"
+      });
+      
+      // Fallback message
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment. In the meantime, remember that breaking down large tasks into smaller, manageable steps is always a great strategy!",
+        isBot: true,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, fallbackMessage]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -139,8 +160,9 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             onKeyPress={handleKeyPress}
             placeholder="Ask me about your studies..."
             className="flex-1"
+            disabled={isTyping}
           />
-          <Button onClick={handleSendMessage} size="icon">
+          <Button onClick={handleSendMessage} size="icon" disabled={isTyping}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
