@@ -8,6 +8,7 @@ import { TaskAnalytics } from "@/components/TaskAnalytics";
 import { Settings } from "@/components/Settings";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useTasks } from "@/hooks/useTasks";
 
 const Index = () => {
@@ -34,7 +35,7 @@ const Index = () => {
     if (loading) {
       return (
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading tasks...</div>
+          <div className="text-lg text-muted-foreground">Loading tasks...</div>
         </div>
       );
     }
@@ -73,26 +74,28 @@ const Index = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen relative"
-      style={{
-        backgroundImage: `url('/lovable-uploads/69b7411a-07f4-4583-9f98-f770319ecf48.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
-      <div className="relative z-10 flex">
-        <Sidebar currentView={currentView} onViewChange={setCurrentView} />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6">
-            {renderCurrentView()}
-          </main>
+    <ProtectedRoute>
+      <div 
+        className="min-h-screen relative"
+        style={{
+          backgroundImage: `url('/lovable-uploads/69b7411a-07f4-4583-9f98-f770319ecf48.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+        <div className="relative z-10 flex">
+          <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 p-6">
+              {renderCurrentView()}
+            </main>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 };
 
