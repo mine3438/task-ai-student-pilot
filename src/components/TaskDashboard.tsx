@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, AlertTriangle, CheckCircle, Clock, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { AIInsights } from "@/components/AIInsights";
 
 interface TaskDashboardProps {
   tasks: Task[];
@@ -36,6 +37,14 @@ export const TaskDashboard = ({ tasks, onAddTask }: TaskDashboardProps) => {
       case 'Low': return 'text-green-600 bg-green-50';
       default: return 'text-gray-600 bg-gray-50';
     }
+  };
+
+  const handleAddTaskWrapper = (task?: Omit<Task, 'id' | 'createdAt'>) => {
+    if (task) {
+      // This would be handled by the parent component
+      console.log('Adding AI suggested task:', task);
+    }
+    onAddTask();
   };
 
   return (
@@ -98,61 +107,71 @@ export const TaskDashboard = ({ tasks, onAddTask }: TaskDashboardProps) => {
         </Card>
       </div>
 
-      {/* Progress and Recent Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Progress Overview</CardTitle>
-            <CardDescription>Your completion rate this week</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Completion Rate</span>
-                <span>{completionRate.toFixed(1)}%</span>
-              </div>
-              <Progress value={completionRate} className="h-2" />
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-green-600 font-medium">{completedTasks}</span>
-                <span className="text-gray-500 ml-1">Completed</span>
-              </div>
-              <div>
-                <span className="text-blue-600 font-medium">{pendingTasks}</span>
-                <span className="text-gray-500 ml-1">Pending</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Tasks</CardTitle>
-            <CardDescription>Your next deadlines</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentTasks.length === 0 ? (
-                <p className="text-gray-500 text-sm">No upcoming tasks</p>
-              ) : (
-                recentTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{task.title}</p>
-                      <p className="text-xs text-gray-500">
-                        Due: {new Date(task.deadline).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </span>
+      {/* AI Insights and Progress/Recent Tasks */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Progress and Recent Tasks */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress Overview</CardTitle>
+                <CardDescription>Your completion rate this week</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Completion Rate</span>
+                    <span>{completionRate.toFixed(1)}%</span>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  <Progress value={completionRate} className="h-2" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-green-600 font-medium">{completedTasks}</span>
+                    <span className="text-gray-500 ml-1">Completed</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-600 font-medium">{pendingTasks}</span>
+                    <span className="text-gray-500 ml-1">Pending</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Tasks</CardTitle>
+                <CardDescription>Your next deadlines</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {recentTasks.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No upcoming tasks</p>
+                  ) : (
+                    recentTasks.map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{task.title}</p>
+                          <p className="text-xs text-gray-500">
+                            Due: {new Date(task.deadline).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        
+        {/* AI Insights */}
+        <div>
+          <AIInsights tasks={tasks} onAddTask={handleAddTaskWrapper} />
+        </div>
       </div>
     </div>
   );
