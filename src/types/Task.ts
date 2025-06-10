@@ -3,9 +3,14 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  deadline: Date;
-  priority: 'High' | 'Medium' | 'Low';
-  category: 'Assignment' | 'Exam' | 'Study' | 'Personal';
+  category: string;
+  priority: 'Low' | 'Medium' | 'High';
+  deadline: string;
   completed: boolean;
-  createdAt: Date;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
+
+export type Priority = 'Low' | 'Medium' | 'High';
+export type Category = 'Work' | 'Personal' | 'Study' | 'Health' | 'Finance' | 'Other';
