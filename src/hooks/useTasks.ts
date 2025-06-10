@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import type { Task } from '@/types/Task';
+import type { Task, CreateTaskInput } from '@/types/Task';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -33,7 +33,13 @@ export const useTasks = () => {
           variant: "destructive",
         });
       } else {
-        setTasks(data || []);
+        // Ensure data conforms to Task type
+        const typedTasks: Task[] = (data || []).map(task => ({
+          ...task,
+          description: task.description || '',
+          priority: task.priority as 'Low' | 'Medium' | 'High',
+        }));
+        setTasks(typedTasks);
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -51,7 +57,7 @@ export const useTasks = () => {
     fetchTasks();
   }, [user]);
 
-  const addTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => {
+  const addTask = async (taskData: CreateTaskInput) => {
     if (!user) {
       toast({
         title: "Error",
@@ -81,7 +87,12 @@ export const useTasks = () => {
           variant: "destructive",
         });
       } else {
-        setTasks(prevTasks => [data, ...prevTasks]);
+        const newTask: Task = {
+          ...data,
+          description: data.description || '',
+          priority: data.priority as 'Low' | 'Medium' | 'High',
+        };
+        setTasks(prevTasks => [newTask, ...prevTasks]);
         toast({
           title: "Success",
           description: "Task created successfully",
@@ -124,9 +135,14 @@ export const useTasks = () => {
           variant: "destructive",
         });
       } else {
+        const updatedTask: Task = {
+          ...data,
+          description: data.description || '',
+          priority: data.priority as 'Low' | 'Medium' | 'High',
+        };
         setTasks(prevTasks => 
           prevTasks.map(task => 
-            task.id === id ? { ...task, ...data } : task
+            task.id === id ? updatedTask : task
           )
         );
         toast({

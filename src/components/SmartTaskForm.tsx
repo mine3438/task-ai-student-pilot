@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { Task } from "@/types/Task";
+import { CreateTaskInput } from "@/types/Task";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { useAIInsights } from "@/hooks/useAIInsights";
 import { Badge } from "@/components/ui/badge";
 
 interface SmartTaskFormProps {
-  onSubmit: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  onSubmit: (task: CreateTaskInput) => void;
   tasks: Task[];
 }
 
@@ -55,7 +55,7 @@ export const SmartTaskForm = ({ onSubmit, tasks }: SmartTaskFormProps) => {
     onSubmit({
       title,
       description,
-      deadline,
+      deadline: deadline.toISOString(),
       priority,
       category,
       completed: false

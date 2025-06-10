@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/Task";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,8 +54,8 @@ export const TaskList = ({
     }
   };
 
-  const isOverdue = (deadline: Date) => {
-    return new Date(deadline) < new Date() && !tasks.find(t => new Date(t.deadline).getTime() === deadline.getTime())?.completed;
+  const isOverdue = (deadlineString: string, completed: boolean) => {
+    return new Date(deadlineString) < new Date() && !completed;
   };
 
   return (
@@ -131,7 +130,7 @@ export const TaskList = ({
               key={task.id} 
               className={`bg-white/70 backdrop-blur-sm transition-all duration-200 hover:shadow-lg ${
                 task.completed ? 'opacity-75' : ''
-              } ${isOverdue(task.deadline) ? 'border-red-300 bg-red-50/50' : ''}`}
+              } ${isOverdue(task.deadline, task.completed) ? 'border-red-300 bg-red-50/50' : ''}`}
             >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -149,7 +148,7 @@ export const TaskList = ({
                         <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : ''}`}>
                           {task.title}
                         </h3>
-                        {isOverdue(task.deadline) && !task.completed && (
+                        {isOverdue(task.deadline, task.completed) && (
                           <Badge variant="destructive" className="text-xs">Overdue</Badge>
                         )}
                       </div>
@@ -160,7 +159,7 @@ export const TaskList = ({
                       
                       <div className="flex items-center space-x-2 text-sm">
                         <span className="text-gray-500">Due:</span>
-                        <span className={`font-medium ${isOverdue(task.deadline) && !task.completed ? 'text-red-600' : ''}`}>
+                        <span className={`font-medium ${isOverdue(task.deadline, task.completed) ? 'text-red-600' : ''}`}>
                           {format(new Date(task.deadline), "MMM dd, yyyy")}
                         </span>
                       </div>

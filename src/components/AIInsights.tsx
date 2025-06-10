@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Task } from '@/types/Task';
+import { Task, CreateTaskInput } from '@/types/Task';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import { Brain, Clock, Calendar, Lightbulb, Plus, Loader2 } from 'lucide-react';
 
 interface AIInsightsProps {
   tasks: Task[];
-  onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  onAddTask: (task: CreateTaskInput) => void;
 }
 
 export const AIInsights = ({ tasks, onAddTask }: AIInsightsProps) => {
@@ -37,10 +37,10 @@ export const AIInsights = ({ tasks, onAddTask }: AIInsightsProps) => {
   }, [tasks]);
 
   const handleAddSuggestedTask = (suggestion: any) => {
-    const newTask = {
+    const newTask: CreateTaskInput = {
       title: suggestion.title,
       description: suggestion.description,
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 1 week from now
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default 1 week from now
       priority: suggestion.priority as 'High' | 'Medium' | 'Low',
       category: suggestion.category as 'Assignment' | 'Exam' | 'Study' | 'Personal',
       completed: false

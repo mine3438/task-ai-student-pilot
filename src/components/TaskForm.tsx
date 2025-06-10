@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Task } from "@/types/Task";
+import { CreateTaskInput } from "@/types/Task";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface TaskFormProps {
-  onSubmit: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  onSubmit: (task: CreateTaskInput) => void;
 }
 
 export const TaskForm = ({ onSubmit }: TaskFormProps) => {
@@ -30,7 +30,7 @@ export const TaskForm = ({ onSubmit }: TaskFormProps) => {
     onSubmit({
       title,
       description,
-      deadline,
+      deadline: deadline.toISOString(),
       priority,
       category,
       completed: false
