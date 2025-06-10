@@ -21,7 +21,7 @@ export const useTasks = () => {
     try {
       const { data, error } = await supabase
         .from('tasks')
-        .select('*')
+        .select('id, title, description, category, priority, deadline, completed, created_at, updated_at, user_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -35,9 +35,16 @@ export const useTasks = () => {
       } else {
         // Ensure data conforms to Task type
         const typedTasks: Task[] = (data || []).map(task => ({
-          ...task,
+          id: task.id,
+          title: task.title,
           description: task.description || '',
+          category: task.category,
           priority: task.priority as 'Low' | 'Medium' | 'High',
+          deadline: task.deadline,
+          completed: task.completed,
+          created_at: task.created_at,
+          updated_at: task.updated_at,
+          user_id: task.user_id,
         }));
         setTasks(typedTasks);
       }
@@ -76,7 +83,7 @@ export const useTasks = () => {
             user_id: user.id,
           }
         ])
-        .select()
+        .select('id, title, description, category, priority, deadline, completed, created_at, updated_at, user_id')
         .single();
 
       if (error) {
@@ -88,9 +95,16 @@ export const useTasks = () => {
         });
       } else {
         const newTask: Task = {
-          ...data,
+          id: data.id,
+          title: data.title,
           description: data.description || '',
+          category: data.category,
           priority: data.priority as 'Low' | 'Medium' | 'High',
+          deadline: data.deadline,
+          completed: data.completed,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          user_id: data.user_id,
         };
         setTasks(prevTasks => [newTask, ...prevTasks]);
         toast({
@@ -108,7 +122,7 @@ export const useTasks = () => {
     }
   };
 
-  const updateTask = async (id: string, updates: Partial<Task>) => {
+  const updateTask = async (id: string, updates: Partial<Omit<Task, 'id' | 'created_at' | 'user_id'>>) => {
     if (!user) {
       toast({
         title: "Error",
@@ -124,7 +138,7 @@ export const useTasks = () => {
         .update(updates)
         .eq('id', id)
         .eq('user_id', user.id)
-        .select()
+        .select('id, title, description, category, priority, deadline, completed, created_at, updated_at, user_id')
         .single();
 
       if (error) {
@@ -136,9 +150,16 @@ export const useTasks = () => {
         });
       } else {
         const updatedTask: Task = {
-          ...data,
+          id: data.id,
+          title: data.title,
           description: data.description || '',
+          category: data.category,
           priority: data.priority as 'Low' | 'Medium' | 'High',
+          deadline: data.deadline,
+          completed: data.completed,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          user_id: data.user_id,
         };
         setTasks(prevTasks => 
           prevTasks.map(task => 
