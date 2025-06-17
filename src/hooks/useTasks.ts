@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useHabitLearning } from '@/hooks/useHabitLearning';
 import type { Task, CreateTaskInput } from '@/types/Task';
 
 export const useTasks = () => {
@@ -10,6 +10,7 @@ export const useTasks = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { trackTaskCompletion, trackTaskInteraction } = useHabitLearning();
 
   const fetchTasks = async () => {
     if (!user) {
@@ -98,9 +99,21 @@ export const useTasks = () => {
           completed: data.completed,
           created_at: data.created_at,
           updated_at: data.updated_at,
-          user_id: user.id, // Temporarily assign current user's ID
+          user_id: user.id,
         };
         setTasks(prevTasks => [newTask, ...prevTasks]);
+        
+        // Track task creation
+        await trackTaskInteraction({
+          task_id: newTask.id,
+          interaction_type: 'accepted_suggestion',
+          suggestion_source: 'manual_creation',
+          interaction_data: {
+            priority: newTask.priority,
+            category: newTask.category
+          }
+        });
+        
         toast({
           title: "Success",
           description: "Task created successfully",
@@ -127,6 +140,8 @@ export const useTasks = () => {
     }
 
     try {
+      const originalTask = tasks.find(task => task.id === id);
+      
       const { data, error } = await supabase
         .from('tasks')
         .update(updates)
@@ -152,13 +167,20 @@ export const useTasks = () => {
           completed: data.completed,
           created_at: data.created_at,
           updated_at: data.updated_at,
-          user_id: user.id, // Temporarily assign current user's ID
+          user_id: user.id,
         };
+        
         setTasks(prevTasks => 
           prevTasks.map(task => 
             task.id === id ? updatedTask : task
           )
         );
+
+        // Track task completion for habit learning
+        if (originalTask && !originalTask.completed && updatedTask.completed) {
+          await trackTaskCompletion(updatedTask);
+        }
+        
         toast({
           title: "Success",
           description: "Task updated successfully",

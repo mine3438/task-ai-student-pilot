@@ -1,10 +1,10 @@
-
 import { Task } from "@/types/Task";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, AlertTriangle, CheckCircle, Clock, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { AIInsights } from "@/components/AIInsights";
+import { LearningInsights } from "@/components/LearningInsights";
 
 interface TaskDashboardProps {
   tasks: Task[];
@@ -41,7 +41,6 @@ export const TaskDashboard = ({ tasks, onAddTask }: TaskDashboardProps) => {
 
   const handleAddTaskWrapper = (task?: Omit<Task, 'id' | 'createdAt'>) => {
     if (task) {
-      // This would be handled by the parent component
       console.log('Adding AI suggested task:', task);
     }
     onAddTask();
@@ -107,7 +106,7 @@ export const TaskDashboard = ({ tasks, onAddTask }: TaskDashboardProps) => {
         </Card>
       </div>
 
-      {/* AI Insights and Progress/Recent Tasks */}
+      {/* AI Insights, Learning Insights and Progress/Recent Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Progress and Recent Tasks */}
@@ -169,8 +168,9 @@ export const TaskDashboard = ({ tasks, onAddTask }: TaskDashboardProps) => {
         </div>
         
         {/* AI Insights */}
-        <div>
+        <div className="space-y-6">
           <AIInsights tasks={tasks} onAddTask={handleAddTaskWrapper} />
+          <LearningInsights />
         </div>
       </div>
     </div>
