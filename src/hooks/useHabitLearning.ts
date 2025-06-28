@@ -35,12 +35,14 @@ export const useHabitLearning = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('task_interactions')
-        .insert([{
-          user_id: user.id,
-          ...interaction
-        }]);
+      // Use supabase.rpc or direct SQL query to insert into task_interactions
+      const { error } = await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: interaction.task_id,
+        p_interaction_type: interaction.interaction_type,
+        p_suggestion_source: interaction.suggestion_source,
+        p_interaction_data: interaction.interaction_data
+      });
 
       if (error) {
         console.error('Error tracking interaction:', error);
@@ -80,67 +82,17 @@ export const useHabitLearning = () => {
     try {
       const currentHour = new Date().getHours();
       
-      // Update optimal completion time habit
-      const { data: existingTimeHabit } = await supabase
-        .from('user_habits')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('habit_type', 'optimal_completion_time')
-        .single();
+      // Update optimal completion time habit using RPC
+      await supabase.rpc('update_completion_time_habit', {
+        p_user_id: user.id,
+        p_hour: currentHour
+      });
 
-      if (existingTimeHabit) {
-        const currentData = existingTimeHabit.habit_data || { hour_preferences: {} };
-        const hourPrefs = currentData.hour_preferences || {};
-        hourPrefs[currentHour] = (hourPrefs[currentHour] || 0) + 1;
-        
-        await supabase
-          .from('user_habits')
-          .update({
-            habit_data: { ...currentData, hour_preferences: hourPrefs },
-            confidence_score: Math.min(existingTimeHabit.confidence_score + 0.1, 1.0)
-          })
-          .eq('id', existingTimeHabit.id);
-      } else {
-        await supabase
-          .from('user_habits')
-          .insert([{
-            user_id: user.id,
-            habit_type: 'optimal_completion_time',
-            habit_data: { hour_preferences: { [currentHour]: 1 } },
-            confidence_score: 0.1
-          }]);
-      }
-
-      // Update category preference habit
-      const { data: existingCategoryHabit } = await supabase
-        .from('user_habits')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('habit_type', 'category_preference')
-        .single();
-
-      if (existingCategoryHabit) {
-        const currentData = existingCategoryHabit.habit_data || { preferences: {} };
-        const categoryPrefs = currentData.preferences || {};
-        categoryPrefs[task.category] = (categoryPrefs[task.category] || 0) + 1;
-        
-        await supabase
-          .from('user_habits')
-          .update({
-            habit_data: { ...currentData, preferences: categoryPrefs },
-            confidence_score: Math.min(existingCategoryHabit.confidence_score + 0.05, 1.0)
-          })
-          .eq('id', existingCategoryHabit.id);
-      } else {
-        await supabase
-          .from('user_habits')
-          .insert([{
-            user_id: user.id,
-            habit_type: 'category_preference',
-            habit_data: { preferences: { [task.category]: 1 } },
-            confidence_score: 0.05
-          }]);
-      }
+      // Update category preference habit using RPC
+      await supabase.rpc('update_category_preference_habit', {
+        p_user_id: user.id,
+        p_category: task.category
+      });
 
     } catch (error) {
       console.error('Error updating habits:', error);
@@ -159,37 +111,12 @@ export const useHabitLearning = () => {
       }
     });
 
-    // Update suggestion accuracy habits
+    // Update suggestion accuracy using RPC
     try {
-      const { data: existingAccuracyHabit } = await supabase
-        .from('user_habits')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('habit_type', 'suggestion_accuracy')
-        .single();
-
-      if (existingAccuracyHabit) {
-        const currentData = existingAccuracyHabit.habit_data || { total: 0, accepted: 0 };
-        const newTotal = currentData.total + 1;
-        const newAccepted = currentData.accepted + (accepted ? 1 : 0);
-        
-        await supabase
-          .from('user_habits')
-          .update({
-            habit_data: { total: newTotal, accepted: newAccepted, accuracy: newAccepted / newTotal },
-            confidence_score: Math.min(existingAccuracyHabit.confidence_score + 0.02, 1.0)
-          })
-          .eq('id', existingAccuracyHabit.id);
-      } else {
-        await supabase
-          .from('user_habits')
-          .insert([{
-            user_id: user.id,
-            habit_type: 'suggestion_accuracy',
-            habit_data: { total: 1, accepted: accepted ? 1 : 0, accuracy: accepted ? 1 : 0 },
-            confidence_score: 0.02
-          }]);
-      }
+      await supabase.rpc('update_suggestion_accuracy', {
+        p_user_id: user.id,
+        p_accepted: accepted
+      });
     } catch (error) {
       console.error('Error updating suggestion accuracy:', error);
     }
@@ -199,11 +126,9 @@ export const useHabitLearning = () => {
     if (!user) return [];
 
     try {
-      const { data, error } = await supabase
-        .from('user_habits')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('confidence_score', { ascending: false });
+      const { data, error } = await supabase.rpc('get_user_habits', {
+        p_user_id: user.id
+      });
 
       if (error) {
         console.error('Error fetching habits:', error);
@@ -221,11 +146,9 @@ export const useHabitLearning = () => {
     if (!user) return [];
 
     try {
-      const { data, error } = await supabase
-        .from('user_learning_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('weight', { ascending: false });
+      const { data, error } = await supabase.rpc('get_user_preferences', {
+        p_user_id: user.id
+      });
 
       if (error) {
         console.error('Error fetching preferences:', error);
