@@ -35,18 +35,20 @@ export const useHabitLearning = () => {
     if (!user) return;
 
     try {
-      // Use supabase.rpc or direct SQL query to insert into task_interactions
-      const { error } = await supabase.rpc('insert_task_interaction', {
-        p_user_id: user.id,
-        p_task_id: interaction.task_id,
-        p_interaction_type: interaction.interaction_type,
-        p_suggestion_source: interaction.suggestion_source,
-        p_interaction_data: interaction.interaction_data
+      // For now, just log the interaction until the database tables are set up
+      console.log('Task interaction tracked:', {
+        user_id: user.id,
+        ...interaction
       });
-
-      if (error) {
-        console.error('Error tracking interaction:', error);
-      }
+      
+      // TODO: Replace with actual database call once tables are created
+      // const { error } = await supabase.rpc('insert_task_interaction', {
+      //   p_user_id: user.id,
+      //   p_task_id: interaction.task_id,
+      //   p_interaction_type: interaction.interaction_type,
+      //   p_suggestion_source: interaction.suggestion_source,
+      //   p_interaction_data: interaction.interaction_data
+      // });
     } catch (error) {
       console.error('Error tracking interaction:', error);
     }
@@ -82,17 +84,22 @@ export const useHabitLearning = () => {
     try {
       const currentHour = new Date().getHours();
       
-      // Update optimal completion time habit using RPC
-      await supabase.rpc('update_completion_time_habit', {
-        p_user_id: user.id,
-        p_hour: currentHour
+      console.log('Updating habits for completion:', {
+        user_id: user.id,
+        hour: currentHour,
+        category: task.category
       });
 
-      // Update category preference habit using RPC
-      await supabase.rpc('update_category_preference_habit', {
-        p_user_id: user.id,
-        p_category: task.category
-      });
+      // TODO: Replace with actual database calls once functions are created
+      // await supabase.rpc('update_completion_time_habit', {
+      //   p_user_id: user.id,
+      //   p_hour: currentHour
+      // });
+
+      // await supabase.rpc('update_category_preference_habit', {
+      //   p_user_id: user.id,
+      //   p_category: task.category
+      // });
 
     } catch (error) {
       console.error('Error updating habits:', error);
@@ -111,31 +118,66 @@ export const useHabitLearning = () => {
       }
     });
 
-    // Update suggestion accuracy using RPC
-    try {
-      await supabase.rpc('update_suggestion_accuracy', {
-        p_user_id: user.id,
-        p_accepted: accepted
-      });
-    } catch (error) {
-      console.error('Error updating suggestion accuracy:', error);
-    }
+    console.log('Suggestion feedback tracked:', {
+      user_id: user.id,
+      accepted
+    });
+
+    // TODO: Replace with actual database call once function is created
+    // try {
+    //   await supabase.rpc('update_suggestion_accuracy', {
+    //     p_user_id: user.id,
+    //     p_accepted: accepted
+    //   });
+    // } catch (error) {
+    //   console.error('Error updating suggestion accuracy:', error);
+    // }
   };
 
   const getUserHabits = async (): Promise<UserHabit[]> => {
     if (!user) return [];
 
     try {
-      const { data, error } = await supabase.rpc('get_user_habits', {
-        p_user_id: user.id
-      });
+      console.log('Getting user habits for:', user.id);
+      
+      // TODO: Replace with actual database call once function is created
+      // const { data, error } = await supabase.rpc('get_user_habits', {
+      //   p_user_id: user.id
+      // });
 
-      if (error) {
-        console.error('Error fetching habits:', error);
-        return [];
-      }
+      // Return mock data for now
+      const mockHabits: UserHabit[] = [
+        {
+          id: '1',
+          habit_type: 'optimal_completion_time',
+          habit_data: {
+            hour_preferences: {
+              '9': 5,
+              '14': 3,
+              '20': 2
+            }
+          },
+          confidence_score: 0.7,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          habit_type: 'category_preference',
+          habit_data: {
+            preferences: {
+              'Study': 8,
+              'Assignment': 5,
+              'Reading': 3
+            }
+          },
+          confidence_score: 0.6,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
 
-      return data || [];
+      return mockHabits;
     } catch (error) {
       console.error('Error fetching habits:', error);
       return [];
@@ -146,16 +188,23 @@ export const useHabitLearning = () => {
     if (!user) return [];
 
     try {
-      const { data, error } = await supabase.rpc('get_user_preferences', {
-        p_user_id: user.id
-      });
+      console.log('Getting user preferences for:', user.id);
+      
+      // TODO: Replace with actual database call once function is created
+      // const { data, error } = await supabase.rpc('get_user_preferences', {
+      //   p_user_id: user.id
+      // });
 
-      if (error) {
-        console.error('Error fetching preferences:', error);
-        return [];
-      }
+      // Return mock data for now
+      const mockPreferences: UserPreference[] = [
+        {
+          preference_type: 'optimal_study_time',
+          preference_value: { hours: [9, 14, 20] },
+          weight: 0.8
+        }
+      ];
 
-      return data || [];
+      return mockPreferences;
     } catch (error) {
       console.error('Error fetching preferences:', error);
       return [];
