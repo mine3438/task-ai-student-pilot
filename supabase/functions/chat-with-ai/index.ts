@@ -3,10 +3,62 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const callOpenAI = async (messages: any[]) => {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: messages,
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+};
+
+const callAnthropic = async (messages: any[]) => {
+  // Convert OpenAI format to Anthropic format
+  const systemMessage = messages.find(m => m.role === 'system');
+  const conversationMessages = messages.filter(m => m.role !== 'system');
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${anthropicApiKey}`,
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 500,
+      system: systemMessage?.content || '',
+      messages: conversationMessages,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Anthropic API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.content[0].text;
 };
 
 serve(async (req) => {
@@ -37,28 +89,51 @@ serve(async (req) => {
       }
     ];
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: messages,
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
-    });
+    let aiResponse;
+    let provider = 'none';
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+    // Try OpenAI first if API key is available
+    if (openAIApiKey) {
+      try {
+        console.log('Trying OpenAI API...');
+        aiResponse = await callOpenAI(messages);
+        provider = 'OpenAI GPT-4o-mini';
+      } catch (error) {
+        console.error('OpenAI failed:', error.message);
+        
+        // Fallback to Anthropic if available
+        if (anthropicApiKey) {
+          try {
+            console.log('Falling back to Anthropic API...');
+            aiResponse = await callAnthropic(messages);
+            provider = 'Anthropic Claude-3-Haiku';
+          } catch (anthropicError) {
+            console.error('Anthropic also failed:', anthropicError.message);
+            throw new Error('Both AI providers are currently unavailable');
+          }
+        } else {
+          throw new Error('OpenAI failed and no Anthropic API key configured');
+        }
+      }
+    } else if (anthropicApiKey) {
+      try {
+        console.log('Using Anthropic API (no OpenAI key)...');
+        aiResponse = await callAnthropic(messages);
+        provider = 'Anthropic Claude-3-Haiku';
+      } catch (error) {
+        console.error('Anthropic failed:', error.message);
+        throw new Error('AI provider is currently unavailable');
+      }
+    } else {
+      throw new Error('No AI API keys configured');
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    console.log(`Response generated using: ${provider}`);
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    return new Response(JSON.stringify({ 
+      response: aiResponse,
+      provider: provider 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

@@ -12,6 +12,7 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
+  provider?: string;
 }
 
 interface ChatBotProps {
@@ -68,19 +69,33 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         id: (Date.now() + 1).toString(),
         text: data.response,
         isBot: true,
-        timestamp: new Date()
+        timestamp: new Date(),
+        provider: data.provider
       };
 
       setMessages(prev => [...prev, botMessage]);
+
+      // Show which AI provider was used
+      if (data.provider) {
+        console.log(`Response from: ${data.provider}`);
+      }
     } catch (error) {
       console.error('Error getting AI response:', error);
+      
+      let errorMessage = "Failed to get AI response. Please try again.";
+      if (error?.message?.includes('rate limit') || error?.message?.includes('429')) {
+        errorMessage = "AI service is currently busy. Please try again in a moment.";
+      } else if (error?.message?.includes('unavailable')) {
+        errorMessage = "AI services are temporarily unavailable. Please try again later.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       
-      // Fallback message
+      // Fallback message with helpful study tip
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment. In the meantime, remember that breaking down large tasks into smaller, manageable steps is always a great strategy!",
@@ -121,8 +136,8 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
           <div
             key={message.id}
             className={cn(
-              "flex",
-              message.isBot ? "justify-start" : "justify-end"
+              "flex flex-col",
+              message.isBot ? "items-start" : "items-end"
             )}
           >
             <div
@@ -135,6 +150,11 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             >
               {message.text}
             </div>
+            {message.provider && (
+              <div className="text-xs text-gray-500 mt-1 px-1">
+                via {message.provider}
+              </div>
+            )}
           </div>
         ))}
         
