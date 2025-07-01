@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
+const togetherApiKey = Deno.env.get('TOGETHER_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -61,6 +62,29 @@ const callAnthropic = async (messages: any[]) => {
   return data.content[0].text;
 };
 
+const callTogether = async (messages: any[]) => {
+  const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${togetherApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+      messages: messages,
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Together API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -101,6 +125,50 @@ serve(async (req) => {
       } catch (error) {
         console.error('OpenAI failed:', error.message);
         
+        // Fallback to Together.ai if available
+        if (togetherApiKey) {
+          try {
+            console.log('Falling back to Together.ai API...');
+            aiResponse = await callTogether(messages);
+            provider = 'Together.ai Llama-3.3-70B';
+          } catch (togetherError) {
+            console.error('Together.ai also failed:', togetherError.message);
+            
+            // Final fallback to Anthropic if available
+            if (anthropicApiKey) {
+              try {
+                console.log('Final fallback to Anthropic API...');
+                aiResponse = await callAnthropic(messages);
+                provider = 'Anthropic Claude-3-Haiku';
+              } catch (anthropicError) {
+                console.error('All providers failed:', anthropicError.message);
+                throw new Error('All AI providers are currently unavailable');
+              }
+            } else {
+              throw new Error('OpenAI and Together.ai failed, no Anthropic API key configured');
+            }
+          }
+        } else if (anthropicApiKey) {
+          try {
+            console.log('Falling back to Anthropic API...');
+            aiResponse = await callAnthropic(messages);
+            provider = 'Anthropic Claude-3-Haiku';
+          } catch (anthropicError) {
+            console.error('Anthropic also failed:', anthropicError.message);
+            throw new Error('OpenAI and Anthropic providers are currently unavailable');
+          }
+        } else {
+          throw new Error('OpenAI failed and no other API keys configured');
+        }
+      }
+    } else if (togetherApiKey) {
+      try {
+        console.log('Using Together.ai API (no OpenAI key)...');
+        aiResponse = await callTogether(messages);
+        provider = 'Together.ai Llama-3.3-70B';
+      } catch (error) {
+        console.error('Together.ai failed:', error.message);
+        
         // Fallback to Anthropic if available
         if (anthropicApiKey) {
           try {
@@ -109,15 +177,15 @@ serve(async (req) => {
             provider = 'Anthropic Claude-3-Haiku';
           } catch (anthropicError) {
             console.error('Anthropic also failed:', anthropicError.message);
-            throw new Error('Both AI providers are currently unavailable');
+            throw new Error('Together.ai and Anthropic providers are currently unavailable');
           }
         } else {
-          throw new Error('OpenAI failed and no Anthropic API key configured');
+          throw new Error('Together.ai failed and no other API keys configured');
         }
       }
     } else if (anthropicApiKey) {
       try {
-        console.log('Using Anthropic API (no OpenAI key)...');
+        console.log('Using Anthropic API (no OpenAI or Together.ai key)...');
         aiResponse = await callAnthropic(messages);
         provider = 'Anthropic Claude-3-Haiku';
       } catch (error) {
