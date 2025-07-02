@@ -173,7 +173,7 @@ export function AuthForm() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-primary hover:bg-primary/90" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-red-600 hover:bg-red-700" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -244,7 +244,7 @@ export function AuthForm() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-primary hover:bg-primary/90" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-red-600 hover:bg-red-700" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
