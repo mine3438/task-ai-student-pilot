@@ -128,8 +128,8 @@ export function AuthForm() {
         <CardContent>
           <Tabs defaultValue="login" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" className="font-semibold">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="font-semibold">Sign Up</TabsTrigger>
+              <TabsTrigger value="login" className="font-semibold text-foreground">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="font-semibold text-foreground">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -173,7 +173,7 @@ export function AuthForm() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-primary hover:bg-primary/90" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -244,7 +244,7 @@ export function AuthForm() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-primary hover:bg-primary/90" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
