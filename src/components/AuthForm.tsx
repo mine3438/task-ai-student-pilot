@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,8 +128,8 @@ export function AuthForm() {
         <CardContent>
           <Tabs defaultValue="login" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login" className="font-semibold">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="font-semibold">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -172,7 +171,11 @@ export function AuthForm() {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow" 
+                  disabled={isLoading}
+                >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
@@ -239,7 +242,11 @@ export function AuthForm() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow" 
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>

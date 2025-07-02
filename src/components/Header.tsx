@@ -65,13 +65,16 @@ export const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background border border-border">
-                <DropdownMenuItem className="hover:bg-accent">
+                <DropdownMenuItem className="hover:bg-accent font-medium">
                   <User className="mr-2 h-4 w-4" />
-                  <span>{user?.email}</span>
+                  <span className="font-semibold">{user?.email}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="hover:bg-accent">
+                <DropdownMenuItem 
+                  onClick={handleSignOut} 
+                  className="hover:bg-accent text-red-600 hover:text-red-700 font-semibold"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span className="font-bold">Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
