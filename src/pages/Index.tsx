@@ -35,7 +35,7 @@ const Index = () => {
     if (loading) {
       return (
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-muted-foreground">Loading tasks...</div>
+          <div className="text-lg text-red-primary">Loading tasks...</div>
         </div>
       );
     }
@@ -75,21 +75,12 @@ const Index = () => {
 
   return (
     <ProtectedRoute>
-      <div 
-        className="min-h-screen relative bg-mighty-light"
-        style={{
-          backgroundImage: `url('/lovable-uploads/69b7411a-07f4-4583-9f98-f770319ecf48.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        <div className="absolute inset-0 bg-mighty-light/90 backdrop-blur-sm"></div>
-        <div className="relative z-10 flex">
+      <div className="min-h-screen bg-black">
+        <div className="flex">
           <Sidebar currentView={currentView} onViewChange={setCurrentView} />
           <div className="flex-1 flex flex-col">
             <Header />
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-6 bg-black">
               <div className="max-w-7xl mx-auto">
                 {renderCurrentView()}
               </div>

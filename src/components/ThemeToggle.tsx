@@ -18,7 +18,7 @@ export function ThemeToggle() {
         <Button 
           variant="ghost" 
           size="icon"
-          className="hover:bg-mighty-olive/10 text-mighty-navy rounded-xl h-10 w-10"
+          className="hover:bg-red-primary/10 text-red-primary rounded-xl h-10 w-10"
         >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -27,23 +27,23 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="bg-white border-2 border-mighty-olive/30 rounded-xl shadow-lg"
+        className="bg-gray-dark border-2 border-gray-600 rounded-xl shadow-lg"
       >
         <DropdownMenuItem 
           onClick={() => setTheme("light")} 
-          className="hover:bg-mighty-light text-mighty-navy font-medium"
+          className="hover:bg-red-primary/10 text-red-primary font-medium"
         >
           Light
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme("dark")} 
-          className="hover:bg-mighty-light text-mighty-navy font-medium"
+          className="hover:bg-red-primary/10 text-red-primary font-medium"
         >
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme("system")} 
-          className="hover:bg-mighty-light text-mighty-navy font-medium"
+          className="hover:bg-red-primary/10 text-red-primary font-medium"
         >
           System
         </DropdownMenuItem>

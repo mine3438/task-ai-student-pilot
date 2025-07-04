@@ -20,10 +20,13 @@ export default {
 		},
 		extend: {
 			colors: {
-				// Mighty Hawk brand colors
-				'mighty-navy': '#10212B',
-				'mighty-olive': '#8FA464',
-				'mighty-light': '#EFFBDB',
+				// Black and Red theme colors
+				'black-primary': '#000000',
+				'red-primary': '#EF4444',
+				'red-secondary': '#DC2626',
+				'red-dark': '#B91C1C',
+				'gray-dark': '#111827',
+				'gray-darker': '#1F2937',
 				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
