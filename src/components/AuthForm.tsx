@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,27 +116,51 @@ export function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#EFFBDB' }}>
+      <Card className="w-full max-w-md shadow-2xl border-0" style={{ backgroundColor: 'white' }}>
+        <CardHeader className="text-center pb-8 pt-8">
+          <CardTitle className="text-3xl font-bold tracking-tight mb-2" style={{ color: '#10212B' }}>
             StudyFlow
           </CardTitle>
-          <CardDescription>
-            Manage your study tasks efficiently
+          <CardDescription className="text-lg font-medium" style={{ color: '#10212B', opacity: 0.7 }}>
+            Master your studies with focused flow
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="login" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" className="font-semibold text-foreground">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="font-semibold text-foreground">Sign Up</TabsTrigger>
+        <CardContent className="px-8 pb-8">
+          <Tabs defaultValue="login" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 p-1 rounded-xl h-12" style={{ backgroundColor: '#EFFBDB' }}>
+              <TabsTrigger 
+                value="login" 
+                className="font-bold text-base rounded-lg transition-all duration-200 data-[state=active]:shadow-md" 
+                style={{ 
+                  color: '#10212B',
+                  backgroundColor: 'transparent',
+                  '--tw-data-state-active-bg': '#8FA464',
+                  '--tw-data-state-active-color': 'white'
+                } as any}
+              >
+                Login
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup" 
+                className="font-bold text-base rounded-lg transition-all duration-200 data-[state=active]:shadow-md"
+                style={{ 
+                  color: '#10212B',
+                  backgroundColor: 'transparent',
+                  '--tw-data-state-active-bg': '#8FA464',
+                  '--tw-data-state-active-color': 'white'
+                } as any}
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+            <TabsContent value="login" className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-3">
+                  <Label htmlFor="login-email" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Email Address
+                  </Label>
                   <Input
                     id="login-email"
                     type="email"
@@ -143,10 +168,19 @@ export function AuthForm() {
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     required
+                    className="h-12 rounded-xl border-2 text-base font-medium transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                    style={{ 
+                      borderColor: '#10212B',
+                      backgroundColor: 'white',
+                      color: '#10212B',
+                      '--tw-ring-color': '#8FA464'
+                    } as any}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="login-password" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Password
+                  </Label>
                   <div className="relative">
                     <Input
                       id="login-password"
@@ -155,25 +189,37 @@ export function AuthForm() {
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
+                      className="h-12 rounded-xl border-2 text-base font-medium pr-12 transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                      style={{ 
+                        borderColor: '#10212B',
+                        backgroundColor: 'white',
+                        color: '#10212B',
+                        '--tw-ring-color': '#8FA464'
+                      } as any}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-lg hover:bg-opacity-10"
+                      style={{ color: '#10212B', '--tw-hover-bg': '#8FA464' } as any}
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </Button>
                   </div>
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-red-600 hover:bg-red-700" 
+                  className="w-full h-12 font-bold text-base tracking-wide rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-white border-0"
+                  style={{ 
+                    backgroundColor: '#8FA464',
+                    '--tw-hover-bg': '#7A8F56'
+                  } as any}
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -181,10 +227,12 @@ export function AuthForm() {
               </form>
             </TabsContent>
             
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+            <TabsContent value="signup" className="space-y-6">
+              <form onSubmit={handleSignup} className="space-y-5">
+                <div className="space-y-3">
+                  <Label htmlFor="signup-name" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Full Name
+                  </Label>
                   <Input
                     id="signup-name"
                     type="text"
@@ -192,10 +240,19 @@ export function AuthForm() {
                     value={signupData.fullName}
                     onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
                     required
+                    className="h-12 rounded-xl border-2 text-base font-medium transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                    style={{ 
+                      borderColor: '#10212B',
+                      backgroundColor: 'white',
+                      color: '#10212B',
+                      '--tw-ring-color': '#8FA464'
+                    } as any}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="signup-email" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Email Address
+                  </Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -203,10 +260,19 @@ export function AuthForm() {
                     value={signupData.email}
                     onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                     required
+                    className="h-12 rounded-xl border-2 text-base font-medium transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                    style={{ 
+                      borderColor: '#10212B',
+                      backgroundColor: 'white',
+                      color: '#10212B',
+                      '--tw-ring-color': '#8FA464'
+                    } as any}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="signup-password" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Password
+                  </Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
@@ -215,24 +281,34 @@ export function AuthForm() {
                       value={signupData.password}
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                       required
+                      className="h-12 rounded-xl border-2 text-base font-medium pr-12 transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                      style={{ 
+                        borderColor: '#10212B',
+                        backgroundColor: 'white',
+                        color: '#10212B',
+                        '--tw-ring-color': '#8FA464'
+                      } as any}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-lg hover:bg-opacity-10"
+                      style={{ color: '#10212B', '--tw-hover-bg': '#8FA464' } as any}
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-confirm">Confirm Password</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="signup-confirm" className="text-base font-semibold" style={{ color: '#10212B' }}>
+                    Confirm Password
+                  </Label>
                   <Input
                     id="signup-confirm"
                     type="password"
@@ -240,11 +316,22 @@ export function AuthForm() {
                     value={signupData.confirmPassword}
                     onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
                     required
+                    className="h-12 rounded-xl border-2 text-base font-medium transition-all duration-200 focus:ring-2 focus:ring-opacity-50"
+                    style={{ 
+                      borderColor: '#10212B',
+                      backgroundColor: 'white',
+                      color: '#10212B',
+                      '--tw-ring-color': '#8FA464'
+                    } as any}
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full font-bold text-base tracking-wide shadow-lg hover:shadow-xl transition-shadow text-white bg-red-600 hover:bg-red-700" 
+                  className="w-full h-12 font-bold text-base tracking-wide rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-white border-0"
+                  style={{ 
+                    backgroundColor: '#8FA464',
+                    '--tw-hover-bg': '#7A8F56'
+                  } as any}
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
