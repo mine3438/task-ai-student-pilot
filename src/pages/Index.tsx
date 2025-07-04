@@ -76,7 +76,7 @@ const Index = () => {
   return (
     <ProtectedRoute>
       <div 
-        className="min-h-screen relative"
+        className="min-h-screen relative bg-mighty-light"
         style={{
           backgroundImage: `url('/lovable-uploads/69b7411a-07f4-4583-9f98-f770319ecf48.png')`,
           backgroundSize: 'cover',
@@ -84,13 +84,15 @@ const Index = () => {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-mighty-light/90 backdrop-blur-sm"></div>
         <div className="relative z-10 flex">
           <Sidebar currentView={currentView} onViewChange={setCurrentView} />
           <div className="flex-1 flex flex-col">
             <Header />
             <main className="flex-1 p-6">
-              {renderCurrentView()}
+              <div className="max-w-7xl mx-auto">
+                {renderCurrentView()}
+              </div>
             </main>
           </div>
         </div>

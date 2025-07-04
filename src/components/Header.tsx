@@ -23,20 +23,21 @@ export const Header = () => {
 
   return (
     <>
-      <header className="bg-background/80 backdrop-blur-sm border-b border-border px-6 py-4">
+      <header className="bg-white/95 backdrop-blur-sm border-b-2 border-mighty-olive px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold tracking-tight text-mighty-navy">
               StudyFlow
             </h1>
+            <div className="w-1 h-8 bg-mighty-olive rounded-full"></div>
           </div>
           
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mighty-navy/60 h-4 w-4" />
               <Input 
                 placeholder="Search tasks..." 
-                className="pl-10 w-64 bg-background/70"
+                className="pl-10 w-64 bg-white border-2 border-mighty-olive/30 focus:border-mighty-olive rounded-xl h-10 text-mighty-navy placeholder:text-mighty-navy/60"
               />
             </div>
             
@@ -44,14 +45,18 @@ export const Header = () => {
               variant="ghost" 
               size="icon"
               onClick={() => setIsChatOpen(true)}
-              className="relative hover:bg-accent"
+              className="relative hover:bg-mighty-olive/10 text-mighty-navy rounded-xl h-10 w-10"
             >
               <MessageCircle className="h-5 w-5" />
             </Button>
             
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative hover:bg-mighty-olive/10 text-mighty-navy rounded-xl h-10 w-10"
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-mighty-olive text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
                 3
               </span>
             </Button>
@@ -60,18 +65,25 @@ export const Header = () => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="hover:bg-mighty-olive/10 text-mighty-navy rounded-xl h-10 w-10"
+                >
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border border-border">
-                <DropdownMenuItem className="hover:bg-accent font-medium">
+              <DropdownMenuContent 
+                align="end" 
+                className="bg-white border-2 border-mighty-olive/30 rounded-xl shadow-lg"
+              >
+                <DropdownMenuItem className="hover:bg-mighty-light font-medium text-mighty-navy">
                   <User className="mr-2 h-4 w-4" />
                   <span className="font-semibold">{user?.email}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleSignOut} 
-                  className="hover:bg-accent text-red-600 hover:text-red-700 font-semibold"
+                  className="hover:bg-mighty-light text-mighty-navy hover:text-mighty-navy font-semibold"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span className="font-bold">Sign out</span>

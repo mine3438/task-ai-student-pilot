@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +20,11 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Mighty Hawk brand colors
+				'mighty-navy': '#10212B',
+				'mighty-olive': '#8FA464',
+				'mighty-light': '#EFFBDB',
+				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
