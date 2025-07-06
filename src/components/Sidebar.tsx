@@ -16,7 +16,7 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   ] as const;
 
   return (
-    <div className="w-64 bg-white/90 backdrop-blur-sm border-r border-gray-200 h-screen">
+    <div className="w-64 bg-gray-900 border-r-2 border-red-600/20 h-screen">
       <div className="p-6">
         <div className="space-y-2">
           {menuItems.map((item) => {
@@ -28,8 +28,8 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
                 className={cn(
                   "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200",
                   currentView === item.id
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-red-600 text-white shadow-lg"
+                    : "text-red-400 hover:bg-red-600/10 hover:text-red-300"
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -46,8 +46,8 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
           className={cn(
             "w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
             currentView === 'settings'
-              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-              : "text-gray-600 hover:bg-gray-100"
+              ? "bg-red-600 text-white shadow-lg"
+              : "text-red-400 hover:bg-red-600/10 hover:text-red-300"
           )}
         >
           <Settings className="h-5 w-5" />
