@@ -187,7 +187,7 @@ export const TrainingDashboard = () => {
                                 .slice(0, 5)
                                 .map(([hour, count]) => (
                                   <Badge key={hour} variant="outline">
-                                    {hour}:00 ({count} tasks)
+                                    {hour}:00 ({String(count)} tasks)
                                   </Badge>
                                 ))}
                             </div>
@@ -202,7 +202,7 @@ export const TrainingDashboard = () => {
                                 .sort(([,a]: any, [,b]: any) => b - a)
                                 .map(([category, count]) => (
                                   <Badge key={category} variant="outline">
-                                    {category} ({count} completed)
+                                    {category} ({String(count)} completed)
                                   </Badge>
                                 ))}
                             </div>
