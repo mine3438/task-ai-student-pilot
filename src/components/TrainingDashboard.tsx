@@ -252,7 +252,12 @@ export const TrainingDashboard = () => {
                         </div>
                         <Progress value={pref.weight * 100} className="h-2" />
                         <div className="text-sm text-muted-foreground">
-                          {JSON.stringify(pref.preference_value, null, 2)}
+                          <pre className="whitespace-pre-wrap">
+                            {typeof pref.preference_value === 'string' 
+                              ? pref.preference_value 
+                              : JSON.stringify(pref.preference_value, null, 2)
+                            }
+                          </pre>
                         </div>
                       </div>
                     </CardContent>
@@ -286,7 +291,7 @@ export const TrainingDashboard = () => {
                         <div key={activity.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
                             <span className="font-medium capitalize">
-                              {activity.interaction_type.replace(/_/g, ' ')}
+                              {activity.interaction_type?.replace(/_/g, ' ') || 'Unknown'}
                             </span>
                             {activity.suggestion_source && (
                               <Badge variant="outline" className="ml-2">
@@ -295,7 +300,7 @@ export const TrainingDashboard = () => {
                             )}
                           </div>
                           <span className="text-sm text-muted-foreground">
-                            {new Date(activity.created_at).toLocaleDateString()}
+                            {activity.created_at ? new Date(activity.created_at).toLocaleDateString() : 'Unknown'}
                           </span>
                         </div>
                       ))}
