@@ -54,6 +54,8 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         content: msg.text
       }));
 
+      console.log('Sending message to AI:', currentInput);
+
       const { data, error } = await supabase.functions.invoke('chat-with-ai', {
         body: {
           message: currentInput,
@@ -62,7 +64,12 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
       });
 
       if (error) {
-        throw error;
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to get AI response');
+      }
+
+      if (!data || !data.response) {
+        throw new Error('Invalid response from AI service');
       }
 
       const botMessage: Message = {
@@ -82,23 +89,26 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
     } catch (error) {
       console.error('Error getting AI response:', error);
       
-      let errorMessage = "Failed to get AI response. Please try again.";
+      let errorMessage = "I'm having trouble connecting right now. Please try again in a moment.";
+      
       if (error?.message?.includes('rate limit') || error?.message?.includes('429')) {
         errorMessage = "AI service is currently busy. Please try again in a moment.";
-      } else if (error?.message?.includes('unavailable')) {
+      } else if (error?.message?.includes('unavailable') || error?.message?.includes('503')) {
         errorMessage = "AI services are temporarily unavailable. Please try again later.";
+      } else if (error?.message?.includes('API key') || error?.message?.includes('configuration')) {
+        errorMessage = "AI service configuration issue. Please contact support if this persists.";
       }
       
       toast({
-        title: "Error",
+        title: "AI Response Error",
         description: errorMessage,
         variant: "destructive"
       });
       
-      // Fallback message with helpful study tip
+      // Add a helpful fallback message
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment. In the meantime, remember that breaking down large tasks into smaller, manageable steps is always a great strategy!",
+        text: `${errorMessage} In the meantime, here's a quick study tip: Breaking down large tasks into smaller, manageable steps is always a great strategy for productivity!`,
         isBot: true,
         timestamp: new Date()
       };
@@ -182,7 +192,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             className="flex-1"
             disabled={isTyping}
           />
-          <Button onClick={handleSendMessage} size="icon" disabled={isTyping}>
+          <Button onClick={handleSendMessage} size="icon" disabled={isTyping || !inputValue.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>

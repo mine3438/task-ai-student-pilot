@@ -12,6 +12,8 @@ const corsHeaders = {
 };
 
 const callOpenAI = async (messages: any[]) => {
+  console.log('Calling OpenAI with messages:', messages.length);
+  
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -27,42 +29,18 @@ const callOpenAI = async (messages: any[]) => {
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
+    const errorText = await response.text();
+    console.error('OpenAI API error:', response.status, errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
   return data.choices[0].message.content;
 };
 
-const callAnthropic = async (messages: any[]) => {
-  // Convert OpenAI format to Anthropic format
-  const systemMessage = messages.find(m => m.role === 'system');
-  const conversationMessages = messages.filter(m => m.role !== 'system');
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${anthropicApiKey}`,
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 500,
-      system: systemMessage?.content || '',
-      messages: conversationMessages,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Anthropic API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.content[0].text;
-};
-
 const callTogether = async (messages: any[]) => {
+  console.log('Calling Together.ai with messages:', messages.length);
+  
   const response = await fetch('https://api.together.xyz/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -78,7 +56,9 @@ const callTogether = async (messages: any[]) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Together API error: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Together API error:', response.status, errorText);
+    throw new Error(`Together API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
@@ -92,6 +72,11 @@ serve(async (req) => {
 
   try {
     const { message, conversationHistory = [] } = await req.json();
+    console.log('Received chat request:', { message, historyLength: conversationHistory.length });
+
+    if (!message || typeof message !== 'string') {
+      throw new Error('Message is required and must be a string');
+    }
 
     const messages = [
       {
@@ -133,32 +118,10 @@ serve(async (req) => {
             provider = 'Together.ai Llama-3.3-70B';
           } catch (togetherError) {
             console.error('Together.ai also failed:', togetherError.message);
-            
-            // Final fallback to Anthropic if available
-            if (anthropicApiKey) {
-              try {
-                console.log('Final fallback to Anthropic API...');
-                aiResponse = await callAnthropic(messages);
-                provider = 'Anthropic Claude-3-Haiku';
-              } catch (anthropicError) {
-                console.error('All providers failed:', anthropicError.message);
-                throw new Error('All AI providers are currently unavailable');
-              }
-            } else {
-              throw new Error('OpenAI and Together.ai failed, no Anthropic API key configured');
-            }
-          }
-        } else if (anthropicApiKey) {
-          try {
-            console.log('Falling back to Anthropic API...');
-            aiResponse = await callAnthropic(messages);
-            provider = 'Anthropic Claude-3-Haiku';
-          } catch (anthropicError) {
-            console.error('Anthropic also failed:', anthropicError.message);
-            throw new Error('OpenAI and Anthropic providers are currently unavailable');
+            throw new Error('All AI providers are currently unavailable. Please check your API keys and try again.');
           }
         } else {
-          throw new Error('OpenAI failed and no other API keys configured');
+          throw error; // Re-throw OpenAI error if no fallback available
         }
       }
     } else if (togetherApiKey) {
@@ -168,32 +131,10 @@ serve(async (req) => {
         provider = 'Together.ai Llama-3.3-70B';
       } catch (error) {
         console.error('Together.ai failed:', error.message);
-        
-        // Fallback to Anthropic if available
-        if (anthropicApiKey) {
-          try {
-            console.log('Falling back to Anthropic API...');
-            aiResponse = await callAnthropic(messages);
-            provider = 'Anthropic Claude-3-Haiku';
-          } catch (anthropicError) {
-            console.error('Anthropic also failed:', anthropicError.message);
-            throw new Error('Together.ai and Anthropic providers are currently unavailable');
-          }
-        } else {
-          throw new Error('Together.ai failed and no other API keys configured');
-        }
-      }
-    } else if (anthropicApiKey) {
-      try {
-        console.log('Using Anthropic API (no OpenAI or Together.ai key)...');
-        aiResponse = await callAnthropic(messages);
-        provider = 'Anthropic Claude-3-Haiku';
-      } catch (error) {
-        console.error('Anthropic failed:', error.message);
-        throw new Error('AI provider is currently unavailable');
+        throw error;
       }
     } else {
-      throw new Error('No AI API keys configured');
+      throw new Error('No AI API keys configured. Please add OPENAI_API_KEY or TOGETHER_API_KEY to your Supabase secrets.');
     }
 
     console.log(`Response generated using: ${provider}`);
@@ -206,8 +147,27 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in chat-with-ai function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    
+    // Provide more specific error messages
+    let errorMessage = 'An unexpected error occurred. Please try again.';
+    let statusCode = 500;
+    
+    if (error.message.includes('API key')) {
+      errorMessage = 'AI service configuration error. Please contact support.';
+      statusCode = 503;
+    } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+      errorMessage = 'AI service is currently busy. Please try again in a moment.';
+      statusCode = 429;
+    } else if (error.message.includes('unavailable')) {
+      errorMessage = 'AI services are temporarily unavailable. Please try again later.';
+      statusCode = 503;
+    }
+    
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: error.message 
+    }), {
+      status: statusCode,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
