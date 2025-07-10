@@ -14,13 +14,20 @@ export const LearningInsights = () => {
   useEffect(() => {
     const loadLearningData = async () => {
       setLoading(true);
-      const [habitsData, preferencesData] = await Promise.all([
-        getUserHabits(),
-        getUserPreferences()
-      ]);
-      setHabits(habitsData);
-      setPreferences(preferencesData);
-      setLoading(false);
+      try {
+        const [habitsData, preferencesData] = await Promise.all([
+          getUserHabits(),
+          getUserPreferences()
+        ]);
+        setHabits(habitsData || []);
+        setPreferences(preferencesData || []);
+      } catch (error) {
+        console.error('Error loading learning data:', error);
+        setHabits([]);
+        setPreferences([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadLearningData();
@@ -133,43 +140,45 @@ export const LearningInsights = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-purple-700">Acceptance Rate</span>
                 <span className="font-medium text-purple-900">
-                  {Math.round(suggestionAccuracy.accuracy * 100)}%
+                  {Math.round((suggestionAccuracy.accuracy || 0) * 100)}%
                 </span>
               </div>
               <div className="text-xs text-purple-600 mt-1">
-                {suggestionAccuracy.accepted} accepted out of {suggestionAccuracy.total} suggestions
+                {suggestionAccuracy.accepted || 0} accepted out of {suggestionAccuracy.total || 0} suggestions
               </div>
             </div>
           </div>
         )}
 
         {/* Learning Progress */}
-        <div>
-          <h4 className="font-medium flex items-center gap-2 mb-3">
-            <BarChart3 className="h-4 w-4 text-orange-600" />
-            Learning Profile Strength
-          </h4>
-          <div className="space-y-2">
-            {habits.map((habit) => (
-              <div key={habit.id} className="flex items-center justify-between">
-                <span className="text-sm capitalize">
-                  {habit.habit_type.replace(/_/g, ' ')}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-orange-500 transition-all duration-300"
-                      style={{ width: `${habit.confidence_score * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground w-8">
-                    {Math.round(habit.confidence_score * 100)}%
+        {habits.length > 0 && (
+          <div>
+            <h4 className="font-medium flex items-center gap-2 mb-3">
+              <BarChart3 className="h-4 w-4 text-orange-600" />
+              Learning Profile Strength
+            </h4>
+            <div className="space-y-2">
+              {habits.map((habit) => (
+                <div key={habit.id} className="flex items-center justify-between">
+                  <span className="text-sm capitalize">
+                    {habit.habit_type.replace(/_/g, ' ')}
                   </span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-orange-500 transition-all duration-300"
+                        style={{ width: `${(habit.confidence_score || 0) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground w-8">
+                      {Math.round((habit.confidence_score || 0) * 100)}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {habits.length === 0 && (
           <div className="text-center py-6 text-muted-foreground">

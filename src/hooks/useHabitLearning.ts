@@ -1,172 +1,17 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/use-toast';
-import type { Task } from '@/types/Task';
-
-interface UserHabit {
-  id: string;
-  habit_type: string;
-  habit_data: any;
-  confidence_score: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface TaskInteraction {
-  task_id?: string;
-  interaction_type: 'accepted_suggestion' | 'rejected_suggestion' | 'completed' | 'delayed' | 'skipped';
-  suggestion_source?: 'ai_suggestion' | 'manual_creation';
-  interaction_data?: any;
-}
-
-interface UserPreference {
-  preference_type: string;
-  preference_value: any;
-  weight: number;
-}
+import { toast } from '@/hooks/use-toast';
 
 export const useHabitLearning = () => {
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
 
-  const trackTaskInteraction = async (interaction: TaskInteraction) => {
-    if (!user) return;
-
+  const getUserHabits = async () => {
     try {
-      setLoading(true);
-      // Use type assertion to bypass TypeScript errors for new functions
-      const { error } = await (supabase as any).rpc('insert_task_interaction', {
-        p_user_id: user.id,
-        p_task_id: interaction.task_id || null,
-        p_interaction_type: interaction.interaction_type,
-        p_suggestion_source: interaction.suggestion_source || null,
-        p_interaction_data: interaction.interaction_data || {}
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
-      if (error) {
-        console.error('Error tracking interaction:', error);
-        toast({
-          title: "Warning",
-          description: "Failed to track interaction for learning",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error tracking interaction:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const trackTaskCompletion = async (task: Task, actualCompletionTime?: number) => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      
-      // Track the completion interaction
-      await trackTaskInteraction({
-        task_id: task.id,
-        interaction_type: 'completed',
-        interaction_data: {
-          priority: task.priority,
-          category: task.category,
-          planned_deadline: task.deadline,
-          actual_completion_time: actualCompletionTime,
-          completed_on_time: new Date() <= new Date(task.deadline)
-        }
-      });
-
-      // Learn from completion patterns
-      await updateHabitFromCompletion(task, actualCompletionTime);
-      
-      toast({
-        title: "Learning Updated",
-        description: "Your completion patterns have been recorded for AI improvement",
-      });
-    } catch (error) {
-      console.error('Error tracking completion:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateHabitFromCompletion = async (task: Task, actualTime?: number) => {
-    if (!user) return;
-
-    try {
-      const currentHour = new Date().getHours();
-      
-      // Update completion time habit using type assertion
-      const { error: timeError } = await (supabase as any).rpc('update_completion_time_habit', {
-        p_user_id: user.id,
-        p_hour: currentHour
-      });
-
-      if (timeError) {
-        console.error('Error updating time habit:', timeError);
-      }
-
-      // Update category preference habit using type assertion
-      const { error: categoryError } = await (supabase as any).rpc('update_category_preference_habit', {
-        p_user_id: user.id,
-        p_category: task.category
-      });
-
-      if (categoryError) {
-        console.error('Error updating category habit:', categoryError);
-      }
-
-    } catch (error) {
-      console.error('Error updating habits:', error);
-    }
-  };
-
-  const trackSuggestionFeedback = async (suggestionId: string, accepted: boolean, suggestionData?: any) => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      
-      await trackTaskInteraction({
-        interaction_type: accepted ? 'accepted_suggestion' : 'rejected_suggestion',
-        suggestion_source: 'ai_suggestion',
-        interaction_data: {
-          suggestion_id: suggestionId,
-          suggestion_data: suggestionData
-        }
-      });
-
-      // Update suggestion accuracy using type assertion
-      const { error } = await (supabase as any).rpc('update_suggestion_accuracy', {
-        p_user_id: user.id,
-        p_accepted: accepted
-      });
-
-      if (error) {
-        console.error('Error updating suggestion accuracy:', error);
-      } else {
-        toast({
-          title: "Feedback Recorded",
-          description: `Your ${accepted ? 'positive' : 'negative'} feedback helps improve AI suggestions`,
-        });
-      }
-    } catch (error) {
-      console.error('Error updating suggestion accuracy:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getUserHabits = async (): Promise<UserHabit[]> => {
-    if (!user) return [];
-
-    try {
-      setLoading(true);
-      // Use type assertion for new database function
-      const { data, error } = await (supabase as any).rpc('get_user_habits', {
+      const { data, error } = await supabase.rpc('get_user_habits', {
         p_user_id: user.id
       });
 
@@ -179,18 +24,15 @@ export const useHabitLearning = () => {
     } catch (error) {
       console.error('Error fetching habits:', error);
       return [];
-    } finally {
-      setLoading(false);
     }
   };
 
-  const getUserPreferences = async (): Promise<UserPreference[]> => {
-    if (!user) return [];
-
+  const getUserPreferences = async () => {
     try {
-      setLoading(true);
-      // Use type assertion for new database function
-      const { data, error } = await (supabase as any).rpc('get_user_preferences', {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase.rpc('get_user_preferences', {
         p_user_id: user.id
       });
 
@@ -203,73 +45,102 @@ export const useHabitLearning = () => {
     } catch (error) {
       console.error('Error fetching preferences:', error);
       return [];
-    } finally {
-      setLoading(false);
     }
   };
 
-  const trackTaskDelay = async (task: Task, delayReason?: string) => {
-    if (!user) return;
-
-    await trackTaskInteraction({
-      task_id: task.id,
-      interaction_type: 'delayed',
-      interaction_data: {
-        original_deadline: task.deadline,
-        delay_reason: delayReason,
-        delay_time: new Date().toISOString()
-      }
-    });
-  };
-
-  const trackTaskSkip = async (task: Task, skipReason?: string) => {
-    if (!user) return;
-
-    await trackTaskInteraction({
-      task_id: task.id,
-      interaction_type: 'skipped',
-      interaction_data: {
-        skip_reason: skipReason,
-        skip_time: new Date().toISOString()
-      }
-    });
-  };
-
-  const getLearningInsights = async () => {
-    if (!user) return null;
-
+  const trackTaskCompletion = async (task: any) => {
     try {
-      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const completionHour = new Date().getHours();
       
-      // Return mock data for now since the database schema is still being updated
-      return {
-        completionRate: 0.75,
-        suggestionAccuracy: 0.68,
-        totalInteractions: 0,
-        recentActivity: []
-      };
+      // Update completion time habit
+      await supabase.rpc('update_completion_time_habit', {
+        p_user_id: user.id,
+        p_hour: completionHour
+      });
+
+      // Update category preference
+      await supabase.rpc('update_category_preference_habit', {
+        p_user_id: user.id,
+        p_category: task.category
+      });
+
+      // Record interaction
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: task.id,
+        p_interaction_type: 'completed',
+        p_interaction_data: {
+          completed_at_hour: completionHour,
+          category: task.category,
+          priority: task.priority,
+          completed_on_time: new Date(task.deadline) >= new Date()
+        }
+      });
+
     } catch (error) {
-      console.error('Error getting learning insights:', error);
-      return {
-        completionRate: 0.0,
-        suggestionAccuracy: 0.0,
-        totalInteractions: 0,
-        recentActivity: []
-      };
-    } finally {
-      setLoading(false);
+      console.error('Error tracking task completion:', error);
+    }
+  };
+
+  const trackSuggestionFeedback = async (suggestionId: string, accepted: boolean, suggestion?: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Update suggestion accuracy
+      await supabase.rpc('update_suggestion_accuracy', {
+        p_user_id: user.id,
+        p_accepted: accepted
+      });
+
+      // Record interaction
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: null,
+        p_interaction_type: accepted ? 'suggestion_accepted' : 'suggestion_rejected',
+        p_interaction_data: {
+          suggestion_id: suggestionId,
+          suggestion_data: suggestion,
+          feedback_type: accepted ? 'positive' : 'negative'
+        },
+        p_suggestion_source: 'ai_insights'
+      });
+
+    } catch (error) {
+      console.error('Error tracking suggestion feedback:', error);
+    }
+  };
+
+  const trackTaskCreation = async (task: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: task.id,
+        p_interaction_type: 'created',
+        p_interaction_data: {
+          category: task.category,
+          priority: task.priority,
+          created_at_hour: new Date().getHours()
+        }
+      });
+
+    } catch (error) {
+      console.error('Error tracking task creation:', error);
     }
   };
 
   return {
     loading,
-    trackTaskInteraction,
-    trackTaskCompletion,
-    trackSuggestionFeedback,
-    trackTaskDelay,
-    trackTaskSkip,
     getUserHabits,
     getUserPreferences,
-    getLearningInsights
+    trackTaskCompletion,
+    trackSuggestionFeedback,
+    trackTaskCreation
   };
 };
