@@ -48,6 +48,41 @@ export const useHabitLearning = () => {
     }
   };
 
+  const getLearningInsights = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      // Get recent interactions
+      const { data: interactions } = await supabase
+        .from('task_interactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      // Calculate completion rate
+      const completedTasks = interactions?.filter(i => i.interaction_type === 'completed').length || 0;
+      const totalTasks = interactions?.filter(i => i.interaction_type === 'created').length || 0;
+      const completionRate = totalTasks > 0 ? completedTasks / totalTasks : 0;
+
+      // Calculate suggestion accuracy
+      const acceptedSuggestions = interactions?.filter(i => i.interaction_type === 'suggestion_accepted').length || 0;
+      const totalSuggestions = interactions?.filter(i => i.interaction_type?.includes('suggestion')).length || 0;
+      const suggestionAccuracy = totalSuggestions > 0 ? acceptedSuggestions / totalSuggestions : 0;
+
+      return {
+        completionRate,
+        suggestionAccuracy,
+        totalInteractions: interactions?.length || 0,
+        recentActivity: interactions?.slice(0, 10) || []
+      };
+    } catch (error) {
+      console.error('Error fetching learning insights:', error);
+      return null;
+    }
+  };
+
   const trackTaskCompletion = async (task: any) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -82,6 +117,45 @@ export const useHabitLearning = () => {
 
     } catch (error) {
       console.error('Error tracking task completion:', error);
+    }
+  };
+
+  const trackTaskDelay = async (task: any, reason: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: task.id,
+        p_interaction_type: 'delayed',
+        p_interaction_data: {
+          delay_reason: reason,
+          original_deadline: task.deadline,
+          delayed_at: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error tracking task delay:', error);
+    }
+  };
+
+  const trackTaskSkip = async (task: any, reason: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: task.id,
+        p_interaction_type: 'skipped',
+        p_interaction_data: {
+          skip_reason: reason,
+          skipped_at: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error tracking task skip:', error);
     }
   };
 
@@ -135,12 +209,32 @@ export const useHabitLearning = () => {
     }
   };
 
+  const trackTaskInteraction = async (taskId: string, interactionType: string, data: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.rpc('insert_task_interaction', {
+        p_user_id: user.id,
+        p_task_id: taskId,
+        p_interaction_type: interactionType,
+        p_interaction_data: data
+      });
+    } catch (error) {
+      console.error('Error tracking task interaction:', error);
+    }
+  };
+
   return {
     loading,
     getUserHabits,
     getUserPreferences,
+    getLearningInsights,
     trackTaskCompletion,
+    trackTaskDelay,
+    trackTaskSkip,
     trackSuggestionFeedback,
-    trackTaskCreation
+    trackTaskCreation,
+    trackTaskInteraction
   };
 };
