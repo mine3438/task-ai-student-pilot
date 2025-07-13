@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ModelDevelopment from "./pages/ModelDevelopment";
+import Training from "./pages/Training";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Auth from "./pages/Auth";
 
@@ -23,6 +25,8 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
+              <Route path="/model-development" element={<ModelDevelopment />} />
+              <Route path="/training" element={<Training />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
